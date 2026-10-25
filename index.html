@@ -1,11 +1,73 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ja">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10182b">
+  <title>月あかりの谷 | 横スクロールアクション</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="game.js" defer></script>
 </head>
 <body>
-    ようこそ私のページへ！
+  <main class="game-shell">
+    <header class="topbar">
+      <a class="brand" href="#" aria-label="Moon Runner">
+        <span class="brand-mark" aria-hidden="true">✦</span>
+        <span>MOON RUNNER</span>
+      </a>
+      <p class="topbar-note">ちいさな冒険、はじまる。</p>
+    </header>
+
+    <section class="game-card" aria-label="横スクロールアクションゲーム">
+      <div class="game-heading">
+        <div>
+          <p class="eyebrow">SIDE-SCROLL ACTION / MVP</p>
+          <h1>月あかりの谷</h1>
+        </div>
+        <p class="objective"><span></span> ゴールの旗を目指そう</p>
+      </div>
+
+      <div class="canvas-wrap">
+        <canvas id="game" width="960" height="540" aria-label="ゲーム画面">
+          このゲームを遊ぶには、Canvasに対応したブラウザが必要です。
+        </canvas>
+        <div class="hud" aria-live="polite">
+          <div class="hud-chip"><span class="heart-icon">♥</span><span id="lives">♥ ♥ ♥</span></div>
+          <div class="hud-chip gem-chip"><span class="gem-icon">✦</span><span id="gems">0</span></div>
+          <div class="hud-chip progress-chip"><span id="progress">0</span><span class="hud-divider">/</span><span>100</span><span class="progress-label">進行度</span></div>
+        </div>
+        <div id="overlay" class="overlay">
+          <div class="overlay-panel">
+            <span class="overlay-icon" aria-hidden="true">✧</span>
+            <p class="overlay-kicker">A LITTLE ADVENTURE</p>
+            <h2 id="overlay-title">月あかりの谷へ</h2>
+            <p id="overlay-message">宝石を集めながら、ゴールの旗を目指そう。</p>
+            <button id="start-button" class="start-button" type="button">冒険をはじめる <span aria-hidden="true">→</span></button>
+            <p class="overlay-hint">いつでも <kbd>Enter</kbd> でスタート</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="game-footer">
+        <p class="footer-tip"><span>✦</span> 敵はジャンプで踏むか、攻撃でたおせるよ</p>
+        <div class="controls" aria-label="操作方法">
+          <span><kbd>A</kbd><kbd>D</kbd> / <kbd>←</kbd><kbd>→</kbd> 移動</span>
+          <span><kbd>Space</kbd> ジャンプ</span>
+          <span><kbd>X</kbd> 攻撃</span>
+        </div>
+      </div>
+      <div class="touch-controls" aria-label="タッチ操作">
+        <div class="touch-group">
+          <button type="button" data-control="left" aria-label="左へ">←</button>
+          <button type="button" data-control="right" aria-label="右へ">→</button>
+        </div>
+        <div class="touch-group">
+          <button type="button" data-control="attack" aria-label="攻撃">✦</button>
+          <button type="button" data-control="jump" aria-label="ジャンプ">↑</button>
+        </div>
+      </div>
+    </section>
+    <footer class="page-footer">MADE FOR YOUR NEXT LITTLE ADVENTURE <span>✦</span></footer>
+  </main>
 </body>
 </html>
