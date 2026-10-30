@@ -46,6 +46,7 @@
   let player;
   let gems;
   let enemies;
+  let fireballs;
   let cameraX = 0;
   let score = 0;
   let gemsCollected = 0;
@@ -60,6 +61,7 @@
     player = { x: 70, y: FLOOR_Y - 42, w: 28, h: 42, vx: 0, vy: 0, grounded: true, facing: 1 };
     gems = gemSpots.map(([x, y]) => ({ x, y, collected: false, phase: Math.random() * 6 }));
     enemies = enemySpots.map((enemy) => ({ ...enemy, x: enemy.x, y: FLOOR_Y - 31, w: 34, h: 31, vx: 35, alive: true }));
+    fireballs = [];
     cameraX = 0;
     score = 0;
     gemsCollected = 0;
@@ -108,12 +110,14 @@
   function attack() {
     if (gameState !== "playing" || attackTime > 0) return;
     attackTime = 0.22;
-    const hit = { x: player.facing > 0 ? player.x + player.w : player.x - 31, y: player.y + 5, w: 31, h: player.h - 7 };
-    enemies.forEach((enemy) => {
-      if (enemy.alive && overlaps(hit, enemy)) {
-        enemy.alive = false;
-        score += ENEMY_SCORE;
-      }
+    const direction = player.facing;
+    fireballs.push({
+      x: direction > 0 ? player.x + player.w + 8 : player.x - 8,
+      y: player.y + player.h * 0.55,
+      r: 9,
+      vx: direction * 360,
+      vy: -180,
+      life: 4
     });
   }
 
@@ -132,6 +136,42 @@
     if (gameState !== "playing") return;
     attackTime = Math.max(0, attackTime - dt);
     invulnerableTime = Math.max(0, invulnerableTime - dt);
+
+    for (let i = fireballs.length - 1; i >= 0; i--) {
+      const fireball = fireballs[i];
+      const previousY = fireball.y;
+      fireball.x += fireball.vx * dt;
+      fireball.vy += 850 * dt;
+      fireball.y += fireball.vy * dt;
+      fireball.life -= dt;
+
+      for (const platform of platforms) {
+        const crossedTop = previousY + fireball.r <= platform.y && fireball.y + fireball.r >= platform.y;
+        const horizontalOverlap = fireball.x + fireball.r > platform.x && fireball.x - fireball.r < platform.x + platform.w;
+        if (fireball.vy > 0 && crossedTop && horizontalOverlap) {
+          fireball.y = platform.y - fireball.r;
+          fireball.vy = -300;
+        }
+      }
+
+      const fireballHitbox = {
+        x: fireball.x - fireball.r,
+        y: fireball.y - fireball.r,
+        w: fireball.r * 2,
+        h: fireball.r * 2
+      };
+      const hitEnemy = enemies.find((enemy) => enemy.alive && overlaps(fireballHitbox, enemy));
+      if (hitEnemy) {
+        hitEnemy.alive = false;
+        score += ENEMY_SCORE;
+        fireballs.splice(i, 1);
+        continue;
+      }
+
+      if (fireball.life <= 0 || fireball.x < 0 || fireball.x > WORLD_WIDTH || fireball.y > HEIGHT + fireball.r) {
+        fireballs.splice(i, 1);
+      }
+    }
 
     const left = keys.has("ArrowLeft") || keys.has("KeyA") || keys.has("left");
     const right = keys.has("ArrowRight") || keys.has("KeyD") || keys.has("right");
@@ -304,32 +344,70 @@
 
     enemies.forEach((enemy) => {
       if (!enemy.alive) return;
-      ctx.fillStyle = "#8e4b83";
-      roundedRect(enemy.x, enemy.y + 5, enemy.w, enemy.h - 5, 11);
+      ctx.fillStyle = "#d86e91";
+      roundedRect(enemy.x + 2, enemy.y + 10, enemy.w - 4, enemy.h - 10, 10);
       ctx.fill();
-      ctx.fillStyle = "#e889b5";
+      ctx.fillStyle = "#f29ab5";
       ctx.beginPath();
-      ctx.arc(enemy.x + enemy.w / 2, enemy.y + 11, 10, Math.PI, 0);
+      ctx.moveTo(enemy.x + 7, enemy.y + 10);
+      ctx.lineTo(enemy.x + 5, enemy.y + 1);
+      ctx.lineTo(enemy.x + 15, enemy.y + 7);
+      ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = "#fff0cb";
-      ctx.fillRect(enemy.x + 9, enemy.y + 15, 4, 5);
-      ctx.fillRect(enemy.x + 22, enemy.y + 15, 4, 5);
+      ctx.beginPath();
+      ctx.moveTo(enemy.x + 27, enemy.y + 10);
+      ctx.lineTo(enemy.x + 29, enemy.y + 1);
+      ctx.lineTo(enemy.x + 19, enemy.y + 7);
+      ctx.closePath();
+      ctx.fill();
+      ctx.fillStyle = "#f5b2c4";
+      ctx.beginPath();
+      ctx.arc(enemy.x + enemy.w / 2, enemy.y + 12, 10, Math.PI, 0);
+      ctx.fill();
       ctx.fillStyle = "#493052";
-      ctx.fillRect(enemy.x + 11, enemy.y + 16, 2, 4);
-      ctx.fillRect(enemy.x + 24, enemy.y + 16, 2, 4);
+      ctx.fillRect(enemy.x + 11, enemy.y + 10, 2, 4);
+      ctx.fillRect(enemy.x + 22, enemy.y + 10, 2, 4);
+      ctx.fillStyle = "#ffcad7";
+      ctx.beginPath();
+      ctx.ellipse(enemy.x + enemy.w / 2, enemy.y + 18, 8, 5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#a94368";
+      ctx.beginPath();
+      ctx.ellipse(enemy.x + 14, enemy.y + 18, 1.4, 2, 0, 0, Math.PI * 2);
+      ctx.ellipse(enemy.x + 20, enemy.y + 18, 1.4, 2, 0, 0, Math.PI * 2);
+      ctx.fill();
       ctx.fillStyle = "#f5bd78";
-      ctx.fillRect(enemy.x + 8, enemy.y + enemy.h - 2, 7, 4);
-      ctx.fillRect(enemy.x + 21, enemy.y + enemy.h - 2, 7, 4);
+      ctx.fillRect(enemy.x + 7, enemy.y + enemy.h - 3, 8, 5);
+      ctx.fillRect(enemy.x + 20, enemy.y + enemy.h - 3, 8, 5);
+    });
+
+    fireballs.forEach((fireball) => {
+      const glow = ctx.createRadialGradient(fireball.x, fireball.y, 1, fireball.x, fireball.y, fireball.r * 2.2);
+      glow.addColorStop(0, "rgba(255, 255, 190, .95)");
+      glow.addColorStop(0.45, "rgba(255, 132, 45, .8)");
+      glow.addColorStop(1, "rgba(255, 75, 35, 0)");
+      ctx.fillStyle = glow;
+      ctx.beginPath();
+      ctx.arc(fireball.x, fireball.y, fireball.r * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#ff8b38";
+      ctx.beginPath();
+      ctx.arc(fireball.x, fireball.y, fireball.r, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.fillStyle = "#fff4a8";
+      ctx.beginPath();
+      ctx.arc(fireball.x - fireball.r * 0.2, fireball.y - fireball.r * 0.2, fireball.r * 0.48, 0, Math.PI * 2);
+      ctx.fill();
     });
 
     const goalX = WORLD_WIDTH - 90;
     ctx.fillStyle = "#b9d8e6";
-    ctx.fillRect(goalX, FLOOR_Y - 112, 5, 112);
+    ctx.fillRect(goalX, FLOOR_Y - 175, 5, 175);
     ctx.fillStyle = "#ffca76";
     ctx.beginPath();
-    ctx.moveTo(goalX + 5, FLOOR_Y - 110);
-    ctx.lineTo(goalX + 55, FLOOR_Y - 95);
-    ctx.lineTo(goalX + 5, FLOOR_Y - 78);
+    ctx.moveTo(goalX + 5, FLOOR_Y - 173);
+    ctx.lineTo(goalX + 65, FLOOR_Y - 155);
+    ctx.lineTo(goalX + 5, FLOOR_Y - 137);
     ctx.closePath();
     ctx.fill();
 
@@ -378,17 +456,6 @@
     ctx.fillRect(x + 17, y + 40, 10, 4);
     ctx.fillStyle = "#e7ffff";
     ctx.fillRect(x + (player.facing > 0 ? 7 : 20), y + 24, 4, 2);
-    if (attackTime > 0) {
-      ctx.strokeStyle = "rgba(126, 255, 229, .95)";
-      ctx.lineWidth = 5;
-      ctx.shadowColor = "#7effe5";
-      ctx.shadowBlur = 12;
-      ctx.beginPath();
-      const ax = player.facing > 0 ? x + 34 : x - 9;
-      ctx.arc(ax, y + 22, 18, player.facing > 0 ? -1.1 : Math.PI + .1, player.facing > 0 ? 1.1 : Math.PI - .1);
-      ctx.stroke();
-      ctx.shadowBlur = 0;
-    }
   }
 
   function draw() {
