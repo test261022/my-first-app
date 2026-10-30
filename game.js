@@ -54,7 +54,7 @@
   function resetGame() {
     player = { x: 70, y: FLOOR_Y - 42, w: 28, h: 42, vx: 0, vy: 0, grounded: true, facing: 1 };
     gems = gemSpots.map(([x, y]) => ({ x, y, collected: false, phase: Math.random() * 6 }));
-    enemies = enemySpots.map((enemy) => ({ ...enemy, x: enemy.x, y: FLOOR_Y - 31, w: 34, h: 31, vx: 48, alive: true }));
+    enemies = enemySpots.map((enemy) => ({ ...enemy, x: enemy.x, y: FLOOR_Y - 31, w: 34, h: 31, vx: 35, alive: true }));
     cameraX = 0;
     score = 0;
     lives = 3;
