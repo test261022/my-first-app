@@ -9,12 +9,16 @@
   const startButton = document.querySelector("#start-button");
   const livesDisplay = document.querySelector("#lives");
   const gemsDisplay = document.querySelector("#gems");
+  const scoreDisplay = document.querySelector("#score");
   const progressDisplay = document.querySelector("#progress");
   const WIDTH = canvas.width;
   const HEIGHT = canvas.height;
   const WORLD_WIDTH = 2600;
   const FLOOR_Y = 465;
   const GRAVITY = 1500;
+  const GEM_SCORE = 100;
+  const ENEMY_SCORE = 200;
+  const CLEAR_BONUS = 500;
   const keys = new Set();
   const platforms = [
     { x: 0, y: FLOOR_Y, w: 670, h: 100 },
@@ -44,6 +48,7 @@
   let enemies;
   let cameraX = 0;
   let score = 0;
+  let gemsCollected = 0;
   let lives = 3;
   let gameState = "ready";
   let lastTime = 0;
@@ -57,6 +62,7 @@
     enemies = enemySpots.map((enemy) => ({ ...enemy, x: enemy.x, y: FLOOR_Y - 31, w: 34, h: 31, vx: 35, alive: true }));
     cameraX = 0;
     score = 0;
+    gemsCollected = 0;
     lives = 3;
     attackTime = 0;
     invulnerableTime = 0;
@@ -65,7 +71,8 @@
 
   function updateHud() {
     livesDisplay.textContent = `${"♥ ".repeat(lives).trim()}${lives < 3 ? ` ${"♡ ".repeat(3 - lives).trim()}` : ""}`;
-    gemsDisplay.textContent = String(score);
+    gemsDisplay.textContent = String(gemsCollected);
+    scoreDisplay.textContent = String(score);
     progressDisplay.textContent = String(Math.min(100, Math.floor((player.x / (WORLD_WIDTH - 100)) * 100)));
   }
 
@@ -85,7 +92,13 @@
 
   function endGame(won) {
     gameState = won ? "won" : "lost";
-    showOverlay(won ? "冒険クリア！" : "もう一度チャレンジ", won ? `宝石を ${score} 個集めたよ。おめでとう！` : "あきらめないで。もう一度、谷を冒険しよう。", won ? "もう一度遊ぶ" : "リトライ");
+    const earnedClearBonus = won && lives === 3;
+    if (won && earnedClearBonus) score += CLEAR_BONUS;
+    updateHud();
+    const result = won
+      ? `スコア ${score} 点！宝石 ${gemsCollected} 個${earnedClearBonus ? "。ノーダメージボーナス +500点！" : "。おめでとう！"}`
+      : `スコア ${score} 点。あきらめないで。もう一度、谷を冒険しよう。`;
+    showOverlay(won ? "冒険クリア！" : "もう一度チャレンジ", result, won ? "もう一度遊ぶ" : "リトライ");
   }
 
   function overlaps(a, b) {
@@ -97,7 +110,10 @@
     attackTime = 0.22;
     const hit = { x: player.facing > 0 ? player.x + player.w : player.x - 31, y: player.y + 5, w: 31, h: player.h - 7 };
     enemies.forEach((enemy) => {
-      if (enemy.alive && overlaps(hit, enemy)) enemy.alive = false;
+      if (enemy.alive && overlaps(hit, enemy)) {
+        enemy.alive = false;
+        score += ENEMY_SCORE;
+      }
     });
   }
 
@@ -147,7 +163,8 @@
     for (const gem of gems) {
       if (!gem.collected && overlaps(player, { x: gem.x - 12, y: gem.y - 12, w: 24, h: 24 })) {
         gem.collected = true;
-        score++;
+        gemsCollected++;
+        score += GEM_SCORE;
       }
     }
 
@@ -158,6 +175,7 @@
       if (!overlaps(player, enemy)) continue;
       if (player.vy > 80 && previousBottom <= enemy.y + 12) {
         enemy.alive = false;
+        score += ENEMY_SCORE;
         player.vy = -390;
         player.grounded = false;
       } else {

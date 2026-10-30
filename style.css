@@ -78,6 +78,7 @@ canvas { display: block; width: 100%; height: auto; aspect-ratio: 16 / 9; }
 #lives { color: #ff9caf; letter-spacing: .1em; }
 .gem-chip { color: #9af4e5; }
 .gem-icon { font-size: 14px; }
+.score-chip { color: #f3cb78; }
 .progress-chip { gap: 6px; margin-left: auto; color: #e3e4f0; }
 .hud-divider, .progress-label { color: #a7aec6; font-weight: 500; }
 .progress-label { margin-left: 4px; font-size: 10px; }
