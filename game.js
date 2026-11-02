@@ -252,15 +252,15 @@
 
   function drawBackground() {
     const sky = ctx.createLinearGradient(0, 0, 0, HEIGHT);
-    sky.addColorStop(0, "#09152d");
-    sky.addColorStop(0.58, "#172f50");
-    sky.addColorStop(1, "#765678");
+    sky.addColorStop(0, "#08091f");
+    sky.addColorStop(0.58, "#17143b");
+    sky.addColorStop(1, "#381b50");
     ctx.fillStyle = sky;
     ctx.fillRect(0, 0, WIDTH, HEIGHT);
 
     const moonGlow = ctx.createRadialGradient(760 - cameraX * 0.08, 112, 8, 760 - cameraX * 0.08, 112, 190);
-    moonGlow.addColorStop(0, "rgba(255, 218, 164, .2)");
-    moonGlow.addColorStop(1, "rgba(255, 218, 164, 0)");
+    moonGlow.addColorStop(0, "rgba(53, 242, 255, .22)");
+    moonGlow.addColorStop(1, "rgba(53, 242, 255, 0)");
     ctx.fillStyle = moonGlow;
     ctx.fillRect(540 - cameraX * 0.08, 0, 440, 310);
 
@@ -268,7 +268,7 @@
       const x = ((i * 197 + 49 - cameraX * 0.12) % (WIDTH + 30) + WIDTH + 30) % (WIDTH + 30);
       const y = (i * 83 + 22) % 250;
       ctx.globalAlpha = 0.35 + Math.sin(animationTime * 2 + i) * 0.2;
-      ctx.fillStyle = i % 5 === 0 ? "#a9eaff" : "#fff0ce";
+      ctx.fillStyle = i % 5 === 0 ? "#ff3cac" : "#a8fbff";
       if (i % 7 === 0) {
         ctx.fillRect(x - 2, y, 5, 1);
         ctx.fillRect(x, y - 2, 1, 5);
@@ -278,17 +278,43 @@
     }
     ctx.globalAlpha = 1;
 
-    ctx.fillStyle = "#ffe4b2";
+    ctx.save();
+    ctx.shadowColor = "#35f2ff";
+    ctx.shadowBlur = 22;
+    ctx.fillStyle = "#b8fbff";
     ctx.beginPath();
     ctx.arc(760 - cameraX * 0.08, 112, 34, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "rgba(255, 226, 184, .15)";
+    ctx.restore();
+    ctx.fillStyle = "rgba(255, 60, 172, .13)";
     ctx.beginPath();
     ctx.arc(760 - cameraX * 0.08, 112, 48, 0, Math.PI * 2);
     ctx.fill();
-    drawHills(315, "#283b60", 0.12, 125);
-    drawHills(370, "#1c3150", 0.22, 100);
-    drawHills(425, "#142841", 0.34, 70);
+    drawCity();
+    drawHills(315, "#211941", 0.12, 125);
+    drawHills(370, "#151735", 0.22, 100);
+    drawHills(425, "#0b102b", 0.34, 70);
+  }
+
+  function drawCity() {
+    const firstBuilding = Math.floor(cameraX * 0.16 / 82) - 1;
+    for (let i = firstBuilding; i < firstBuilding + 15; i++) {
+      const x = i * 82 - cameraX * 0.16;
+      const height = 82 + ((i * 47 % 97) + 97) % 97;
+      const top = 470 - height;
+      const width = 54 + ((i * 13 % 15) + 15) % 15;
+      ctx.fillStyle = "#10132f";
+      ctx.fillRect(x, top, width, height + 70);
+      ctx.fillStyle = i % 2 === 0 ? "rgba(53, 242, 255, .62)" : "rgba(255, 60, 172, .62)";
+      ctx.fillRect(x, top, width, 2);
+      for (let row = top + 12; row < 455; row += 18) {
+        for (let col = x + 8; col < x + width - 5; col += 14) {
+          ctx.globalAlpha = ((i + row + col) % 3 === 0) ? 0.7 : 0.28;
+          ctx.fillRect(col, row, 4, 7);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
   }
 
   function drawHills(y, color, parallax, height) {
@@ -310,15 +336,18 @@
     ctx.translate(-cameraX, 0);
     for (const platform of platforms) {
       const ground = ctx.createLinearGradient(0, platform.y, 0, platform.y + platform.h);
-      ground.addColorStop(0, platform.y === FLOOR_Y ? "#203e55" : "#304b68");
-      ground.addColorStop(1, "#111e35");
+      ground.addColorStop(0, platform.y === FLOOR_Y ? "#18284a" : "#252249");
+      ground.addColorStop(1, "#0b1029");
       ctx.fillStyle = ground;
       roundedRect(platform.x, platform.y, platform.w, platform.h, 6);
       ctx.fill();
-      ctx.fillStyle = "#62d6c3";
+      ctx.shadowColor = "#35f2ff";
+      ctx.shadowBlur = 10;
+      ctx.fillStyle = "#35f2ff";
       roundedRect(platform.x, platform.y, platform.w, 5, 3);
       ctx.fill();
-      ctx.fillStyle = "rgba(177, 229, 232, .18)";
+      ctx.shadowBlur = 0;
+      ctx.fillStyle = "rgba(168, 251, 255, .22)";
       for (let x = platform.x + 20; x < platform.x + platform.w - 8; x += 38) {
         ctx.fillRect(x, platform.y + 22 + (x % 3) * 9, 3, 3);
       }
@@ -332,22 +361,22 @@
       ctx.save();
       ctx.translate(gem.x, y);
       ctx.rotate(Math.PI / 4);
-      ctx.shadowColor = "#78f5e1";
+      ctx.shadowColor = "#35f2ff";
       ctx.shadowBlur = 18;
-      ctx.fillStyle = "#77f5df";
+      ctx.fillStyle = "#35f2ff";
       ctx.fillRect(-7, -7, 14, 14);
       ctx.shadowBlur = 0;
-      ctx.fillStyle = "#eafff8";
+      ctx.fillStyle = "#f4ffff";
       ctx.fillRect(-3, -5, 4, 7);
       ctx.restore();
     });
 
     enemies.forEach((enemy) => {
       if (!enemy.alive) return;
-      ctx.fillStyle = "#d86e91";
+      ctx.fillStyle = "#a52b83";
       roundedRect(enemy.x + 2, enemy.y + 10, enemy.w - 4, enemy.h - 10, 10);
       ctx.fill();
-      ctx.fillStyle = "#f29ab5";
+      ctx.fillStyle = "#ff3cac";
       ctx.beginPath();
       ctx.moveTo(enemy.x + 7, enemy.y + 10);
       ctx.lineTo(enemy.x + 5, enemy.y + 1);
@@ -360,56 +389,59 @@
       ctx.lineTo(enemy.x + 19, enemy.y + 7);
       ctx.closePath();
       ctx.fill();
-      ctx.fillStyle = "#f5b2c4";
+      ctx.fillStyle = "#ff8bd2";
       ctx.beginPath();
       ctx.arc(enemy.x + enemy.w / 2, enemy.y + 12, 10, Math.PI, 0);
       ctx.fill();
-      ctx.fillStyle = "#493052";
+      ctx.fillStyle = "#160f32";
       ctx.fillRect(enemy.x + 11, enemy.y + 10, 2, 4);
       ctx.fillRect(enemy.x + 22, enemy.y + 10, 2, 4);
-      ctx.fillStyle = "#ffcad7";
+      ctx.fillStyle = "#ffe5f7";
       ctx.beginPath();
       ctx.ellipse(enemy.x + enemy.w / 2, enemy.y + 18, 8, 5, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#a94368";
+      ctx.fillStyle = "#c52c8b";
       ctx.beginPath();
       ctx.ellipse(enemy.x + 14, enemy.y + 18, 1.4, 2, 0, 0, Math.PI * 2);
       ctx.ellipse(enemy.x + 20, enemy.y + 18, 1.4, 2, 0, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#f5bd78";
+      ctx.fillStyle = "#35f2ff";
       ctx.fillRect(enemy.x + 7, enemy.y + enemy.h - 3, 8, 5);
       ctx.fillRect(enemy.x + 20, enemy.y + enemy.h - 3, 8, 5);
     });
 
     fireballs.forEach((fireball) => {
       const glow = ctx.createRadialGradient(fireball.x, fireball.y, 1, fireball.x, fireball.y, fireball.r * 2.2);
-      glow.addColorStop(0, "rgba(255, 255, 190, .95)");
-      glow.addColorStop(0.45, "rgba(255, 132, 45, .8)");
-      glow.addColorStop(1, "rgba(255, 75, 35, 0)");
+      glow.addColorStop(0, "rgba(255, 245, 255, .95)");
+      glow.addColorStop(0.45, "rgba(255, 60, 172, .8)");
+      glow.addColorStop(1, "rgba(255, 60, 172, 0)");
       ctx.fillStyle = glow;
       ctx.beginPath();
       ctx.arc(fireball.x, fireball.y, fireball.r * 2.2, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#ff8b38";
+      ctx.fillStyle = "#ff3cac";
       ctx.beginPath();
       ctx.arc(fireball.x, fireball.y, fireball.r, 0, Math.PI * 2);
       ctx.fill();
-      ctx.fillStyle = "#fff4a8";
+      ctx.fillStyle = "#b8fbff";
       ctx.beginPath();
       ctx.arc(fireball.x - fireball.r * 0.2, fireball.y - fireball.r * 0.2, fireball.r * 0.48, 0, Math.PI * 2);
       ctx.fill();
     });
 
     const goalX = WORLD_WIDTH - 90;
-    ctx.fillStyle = "#b9d8e6";
+    ctx.fillStyle = "#35f2ff";
+    ctx.shadowColor = "#35f2ff";
+    ctx.shadowBlur = 12;
     ctx.fillRect(goalX, FLOOR_Y - 175, 5, 175);
-    ctx.fillStyle = "#ffca76";
+    ctx.fillStyle = "#ff3cac";
     ctx.beginPath();
     ctx.moveTo(goalX + 5, FLOOR_Y - 173);
     ctx.lineTo(goalX + 65, FLOOR_Y - 155);
     ctx.lineTo(goalX + 5, FLOOR_Y - 137);
     ctx.closePath();
     ctx.fill();
+    ctx.shadowBlur = 0;
 
     drawPlayer();
     ctx.restore();
@@ -420,14 +452,14 @@
     const bob = player.grounded && Math.abs(player.vx) > 0 ? Math.sin(animationTime * 17) * 2 : 0;
     const x = player.x;
     const y = player.y + bob;
-    ctx.fillStyle = "rgba(16, 22, 37, .28)";
+    ctx.fillStyle = "rgba(2, 4, 18, .4)";
     ctx.beginPath();
     ctx.ellipse(x + 15, y + player.h + 3, 17, 4, 0, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#176b79";
+    ctx.fillStyle = "#173c65";
     roundedRect(x + 2, y + 15, 25, 25, 8);
     ctx.fill();
-    ctx.fillStyle = "#37b8b2";
+    ctx.fillStyle = "#35f2ff";
     ctx.beginPath();
     ctx.moveTo(x + 5, y + 20);
     ctx.lineTo(x + 15, y + 34);
@@ -436,25 +468,25 @@
     ctx.lineTo(x + 7, y + 38);
     ctx.closePath();
     ctx.fill();
-    ctx.fillStyle = "#ffd5aa";
+    ctx.fillStyle = "#ffd7f3";
     ctx.beginPath();
     ctx.arc(x + 15, y + 11, 11, 0, Math.PI * 2);
     ctx.fill();
-    ctx.fillStyle = "#263451";
+    ctx.fillStyle = "#281644";
     ctx.beginPath();
     ctx.arc(x + 15, y + 8, 11, Math.PI, Math.PI * 2);
     ctx.lineTo(x + 25, y + 12);
     ctx.lineTo(x + 5, y + 12);
     ctx.fill();
-    ctx.fillStyle = "#1b2940";
+    ctx.fillStyle = "#150f2e";
     ctx.fillRect(x + (player.facing > 0 ? 18 : 9), y + 11, 3, 4);
-    ctx.fillStyle = "#ffd5aa";
+    ctx.fillStyle = "#ffd7f3";
     ctx.fillRect(x + 4, y + 36, 9, 7);
     ctx.fillRect(x + 17, y + 36, 9, 7);
-    ctx.fillStyle = "#f5bd67";
+    ctx.fillStyle = "#ff3cac";
     ctx.fillRect(x + 4, y + 40, 10, 4);
     ctx.fillRect(x + 17, y + 40, 10, 4);
-    ctx.fillStyle = "#e7ffff";
+    ctx.fillStyle = "#ffffff";
     ctx.fillRect(x + (player.facing > 0 ? 7 : 20), y + 24, 4, 2);
   }
 
@@ -508,6 +540,6 @@
   });
 
   resetGame();
-  showOverlay("月あかりの谷へ", "宝石を集めながら、ゴールの旗を目指そう。", "冒険をはじめる");
+  showOverlay("ネオンシティへ", "宝石を集めながら、ゴールの旗を目指そう。", "冒険をはじめる");
   requestAnimationFrame(frame);
 })();
